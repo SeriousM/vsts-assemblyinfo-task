@@ -22,7 +22,8 @@ Function NetFramework($Model, $RegEx) {
 
         attrib $file -r
         $filecontent = Get-Content $file
-        $filecontent[0] = "using System.Reflection;using System.Runtime.CompilerServices;`r`n" + $filecontent[0]
+        $filecontent = AddUsingIfMissing -File $file -Content $filecontent -Value "using System.Runtime.CompilerServices;"
+        $filecontent = AddUsingIfMissing -File $file -Content $filecontent -Value "using System.Reflection;"
         $filecontent = ProcessNetFrameworkAttribute -File $file -FileContent $filecontent -AttributeName "AssemblyVersion" -Regex $RegEx.Word -Value $Model.Version -InsertAttributes $Model.InsertAttributes
         $filecontent = ProcessNetFrameworkAttribute -File $file -FileContent $filecontent -AttributeName "AssemblyFileVersion" -Regex $RegEx.Word -Value $Model.FileVersion -InsertAttributes $Model.InsertAttributes
         $filecontent = ProcessNetFrameworkAttribute -File $file -FileContent $filecontent -AttributeName "AssemblyInformationalVersion" -Regex $RegEx.Word -Value $Model.InformationalVersion -InsertAttributes $Model.InsertAttributes
@@ -46,6 +47,21 @@ Function NetFramework($Model, $RegEx) {
 
         Write-Host "`t$($file.FullName) - Assembly Info Applied"
     }
+}
+
+Function AddUsingIfMissing([System.IO.FileInfo]$File, [System.Collections.ArrayList]$Content, [string]$Value)
+{
+    # no vb support.
+    if ($File.Extension -eq ".cs") {
+        
+        # ignores comments and finds correct attribute
+        if (-not ($Content -like $Value)) {
+            Write-Host "`tAdding --> $Value"
+            $Content[0] = $Value + "`r`n" + $Content[0]
+        }
+    }
+
+    return $Content
 }
 
 Function ProcessNetFrameworkAttribute($File, $FileContent, $AttributeName, $Regex, $Value, $InsertAttributes) {
