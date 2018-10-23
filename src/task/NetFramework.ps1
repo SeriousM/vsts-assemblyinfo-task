@@ -22,6 +22,7 @@ Function NetFramework($Model, $RegEx) {
 
         attrib $file -r
         $filecontent = Get-Content $file
+        $filecontent[0] = "using System.Reflection;using System.Runtime.CompilerServices;`r`n" + $filecontent[0]
         $filecontent = ProcessNetFrameworkAttribute -File $file -FileContent $filecontent -AttributeName "AssemblyVersion" -Regex $RegEx.Word -Value $Model.Version -InsertAttributes $Model.InsertAttributes
         $filecontent = ProcessNetFrameworkAttribute -File $file -FileContent $filecontent -AttributeName "AssemblyFileVersion" -Regex $RegEx.Word -Value $Model.FileVersion -InsertAttributes $Model.InsertAttributes
         $filecontent = ProcessNetFrameworkAttribute -File $file -FileContent $filecontent -AttributeName "AssemblyInformationalVersion" -Regex $RegEx.Word -Value $Model.InformationalVersion -InsertAttributes $Model.InsertAttributes
